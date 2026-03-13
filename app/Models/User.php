@@ -25,6 +25,7 @@ class User extends Authenticatable implements JWTSubject
         'password',
     ];
 
+    // copy from tymon/jwt
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *
