@@ -24,6 +24,14 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
-        //
-    })->create();
+  ->withExceptions(function (Exceptions $exceptions): void {
+    // can user model , etc ..
+    $exceptions->render(function (\Illuminate\Http\Exceptions\ThrottleRequestsException $e, $request) {
+        return response()->json([
+            'message' => 'Too many requests. Please try again later.',
+            'status' => 429,
+        ], 429);
+    });
+
+})
+->create();
