@@ -1,59 +1,104 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# JWT Auth Laravel API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel 12 API project that uses `tymon/jwt-auth` for stateless authentication with role-based access (`admin` vs `user`).
 
-## About Laravel
+## Project Process (High Level)
+1. A user submits credentials to `POST /api/login`.
+2. If valid, the API returns a JWT access token.
+3. The client sends the token in `Authorization: Bearer <token>` for protected routes.
+4. The `jwt` middleware authenticates the token for `/api/me` and `/api/logout`.
+5. The `admin` and `user` middleware enforce role-based access for `/api/admin` and `/api/user`.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Setup
+1. Install dependencies.
+   `composer install`
+2. Create `.env` and app key.
+   `cp .env.example .env`
+   `php artisan key:generate`
+3. Configure DB in `.env` and run migrations.
+   `php artisan migrate`
+4. Generate JWT secret.
+   `php artisan jwt:secret`
+5. Run the app.
+   `php artisan serve`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Dropdown Functions (Endpoints)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+<details>
+<summary><strong>POST /api/login</strong></summary>
 
-## Learning Laravel
+Purpose:
+- Authenticates the user and issues a JWT token.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Middleware:
+- `throttle:5,1` (rate limit: 5 requests per minute).
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Request:
+- `email`
+- `password`
 
-## Laravel Sponsors
+Response:
+- `access_token`
+- `token_type` (note: currently returns `barer` in code)
+- `expires_in`
+</details>
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+<details>
+<summary><strong>POST /api/me</strong></summary>
 
-### Premium Partners
+Purpose:
+- Returns the currently authenticated user.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Middleware:
+- `jwt`
 
-## Contributing
+Header:
+- `Authorization: Bearer <token>`
+</details>
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+<details>
+<summary><strong>POST /api/logout</strong></summary>
 
-## Code of Conduct
+Purpose:
+- Invalidates the current JWT token.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Middleware:
+- `jwt`
 
-## Security Vulnerabilities
+Header:
+- `Authorization: Bearer <token>`
+</details>
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+<details>
+<summary><strong>GET /api/admin</strong></summary>
 
-## License
+Purpose:
+- Example admin-only resource.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Middleware:
+- `admin`
+
+Notes:
+- Requires the authenticated user to have `role = admin`.
+</details>
+
+<details>
+<summary><strong>GET /api/user</strong></summary>
+
+Purpose:
+- Example user-only resource.
+
+Middleware:
+- `user`
+
+Notes:
+- Requires the authenticated user to have `role = user`.
+</details>
+
+## Middleware Map
+- `jwt`: `app/Http/Middleware/JWTMiddleware.php`
+- `admin`: `app/Http/Middleware/AdminMiddleware.php`
+- `user`: `app/Http/Middleware/UserMiddleware.php`
+
+## Assumptions
+- The `users` table (and User model) includes a `role` column with values such as `admin` or `user`.
