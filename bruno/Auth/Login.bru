@@ -21,6 +21,10 @@ body:json {
   }
 }
 
+vars:pre-request {
+  base_url: http://localhost:8000
+}
+
 script:post-response {
   const data = res.getBody();
   if (data && data.access_token) {

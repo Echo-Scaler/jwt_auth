@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Tymon\JWTAuth\Exceptions\JWTException;
-
+use Tymon\JWTAuth\Facades\JWTAuth;
 class AuthController extends Controller
 {
     public function login()
@@ -32,8 +32,9 @@ class AuthController extends Controller
     {
         try {
             // when logout
-            JWT::logout();
-
+            // JWT::logout();
+            JWTAuth::invalidate(JWTAuth::getToken());
+            
             return response()->json([
                 'message' => 'Successfully Logged Out',
             ]);
