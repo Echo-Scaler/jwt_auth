@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Middleware\JWTMiddleware;
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\UserMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Register custom middleware alias
         $middleware->alias([
             'jwt' => JWTMiddleware::class,
+            'admin' => AdminMiddleware::class,
+            'user' => UserMiddleware::class,
         ]);
 
     })

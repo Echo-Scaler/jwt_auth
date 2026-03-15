@@ -22,11 +22,26 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
-
+        // User::create([
+        //     'name' => 'test',
+        //     'email' => 'test@gmail.com',
+        //     'password' => Hash::make('password'),
+        //
+        // ]);
+        
+        //create role => admin / user
         User::create([
-            'name' => 'Test',
-            'email' => 'test@gmail.com',
-            'password' => Hash::make('password')
+            'name' => 'Admin',
+            'email' => 'admin@gmail.com',
+            'password' => Hash::make('password'),
+            'role' => 'admin'
+        ]);
+
+         User::create([
+            'name' => 'User',
+            'email' => 'user@gmail.com',
+            'password' => Hash::make('password'),
+            'role' => 'user'
         ]);
     }
 }
